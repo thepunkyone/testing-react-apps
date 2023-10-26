@@ -15,11 +15,12 @@ beforeEach(() => {
   document.body.innerHTML = ''
 })
 
-const mouseEvent = new MouseEvent('click', {
-  bubbles: true,
-  cancelable: true,
-  button: 0,
-})
+const mouseEvent = () =>
+  new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    button: 0,
+  })
 
 test('counter increments and decrements when the buttons are clicked', () => {
   const div = document.createElement('div')
@@ -34,11 +35,11 @@ test('counter increments and decrements when the buttons are clicked', () => {
 
   expect(message.textContent).toBe('Current count: 0')
 
-  act(() => increment.dispatchEvent(mouseEvent))
+  act(() => increment.dispatchEvent(mouseEvent()))
 
   expect(message.textContent).toBe('Current count: 1')
 
-  act(() => decrement.dispatchEvent(mouseEvent))
+  act(() => decrement.dispatchEvent(mouseEvent()))
 
   expect(message.textContent).toBe('Current count: 0')
 })
