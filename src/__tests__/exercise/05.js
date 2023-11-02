@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event'
 import {build, fake} from '@jackfranklin/test-data-bot'
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
+import {handlers} from '../../test/server-handlers'
 import Login from '../../components/login-submission'
 
 const buildLoginForm = build({
@@ -16,16 +17,14 @@ const buildLoginForm = build({
   },
 })
 
-const userNameFromApiResponse = 'Crabbo'
-
-const server = setupServer(
-  rest.post('https://auth-provider.example.com/api/login', (req, res, ctx) => {
-    return res(ctx.json({username: userNameFromApiResponse}))
-  }),
-)
+const server = setupServer(...handlers)
 
 beforeAll(() => {
   server.listen()
+})
+
+afterEach(() => {
+  server.resetHandlers()
 })
 
 afterAll(() => {
@@ -34,6 +33,7 @@ afterAll(() => {
 
 test(`logging in displays the user's username`, async () => {
   render(<Login />)
+
   const {username, password} = buildLoginForm()
 
   await userEvent.type(screen.getByLabelText(/username/i), username)
@@ -41,7 +41,48 @@ test(`logging in displays the user's username`, async () => {
 
   await userEvent.click(screen.getByRole('button', {name: /submit/i}))
 
-  await waitForElementToBeRemoved(screen.getByLabelText(/loading/i))
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
-  expect(screen.getByText(userNameFromApiResponse)).toBeVisible()
+  expect(screen.getByText(username)).toBeVisible()
+})
+
+test(`submitting the form without password displays the error message`, async () => {
+  render(<Login />)
+
+  const {username} = buildLoginForm()
+
+  await userEvent.type(screen.getByLabelText(/username/i), username)
+
+  await userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
+
+  expect(screen.getByRole('alert').textContent).toMatchInlineSnapshot(
+    `"password required"`,
+  )
+})
+
+test(`a server error after submitting the form displays the error message`, async () => {
+  const testErrorMessage = 'server error'
+
+  server.use(
+    rest.post(
+      'https://auth-provider.example.com/api/login',
+      async (req, res, ctx) => {
+        return res(ctx.status(500), ctx.json({message: testErrorMessage}))
+      },
+    ),
+  )
+
+  render(<Login />)
+
+  const {username} = buildLoginForm()
+
+  await userEvent.type(screen.getByLabelText(/username/i), username)
+
+  await userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
+
+  expect(screen.getByRole('alert')).toHaveTextContent(testErrorMessage)
 })
