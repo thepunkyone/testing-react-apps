@@ -73,13 +73,13 @@ test('exposes the count and increment/decrement functions - simplified mock comp
 })
 
 test('allows customization of the initial count', () => {
-  const {result} = renderHook(() => useCounter({initialCount: 1}))
+  const {result} = renderHook(useCounter, {initialProps: {initialCount: 1}})
 
   expect(result.current.count).toBe(1)
 })
 
 test('allows customization of the step', () => {
-  const {result} = renderHook(() => useCounter({step: 2}))
+  const {result} = renderHook(useCounter, {initialProps: {step: 2}})
 
   act(() => {
     result.current.increment()
