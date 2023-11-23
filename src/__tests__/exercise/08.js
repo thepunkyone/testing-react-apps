@@ -57,25 +57,19 @@ test('exposes the count and increment/decrement functions - simplified mock comp
 
   render(<TestComponent />)
 
-  const {count: initialCount, increment} = result
-
-  expect(initialCount).toBe(0)
+  expect(result.count).toBe(0)
 
   act(() => {
-    increment()
+    result.increment()
   })
 
-  const {count: countAfterIncrement, decrement} = result
-
-  expect(countAfterIncrement).toBe(1)
+  expect(result.count).toBe(1)
 
   act(() => {
-    decrement()
+    result.decrement()
   })
 
-  const {count: countAfterDecrement} = result
-
-  expect(countAfterDecrement).toBe(0)
+  expect(result.count).toBe(0)
 })
 
 test('allows customization of the initial count', () => {
