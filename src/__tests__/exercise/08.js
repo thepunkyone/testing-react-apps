@@ -2,7 +2,7 @@
 // http://localhost:3000/counter-hook
 
 import * as React from 'react'
-import {render, screen} from '@testing-library/react'
+import {render, screen, renderHook} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
 import {act} from 'react-dom/test-utils'
@@ -79,19 +79,19 @@ test('exposes the count and increment/decrement functions - simplified mock comp
 })
 
 test('allows customization of the initial count', () => {
-  const results = setup({initialCount: 1})
+  const {result} = renderHook(() => useCounter({initialCount: 1}))
 
-  expect(results.count).toBe(1)
+  expect(result.current.count).toBe(1)
 })
 
 test('allows customization of the step', () => {
-  const results = setup({step: 2})
+  const {result} = renderHook(() => useCounter({step: 2}))
 
   act(() => {
-    results.increment()
+    result.current.increment()
   })
 
-  expect(results.count).toBe(2)
+  expect(result.current.count).toBe(2)
 })
 
 /* eslint no-unused-vars:0 */
